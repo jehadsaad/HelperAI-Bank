@@ -1,4 +1,5 @@
 ﻿# HelperAI Bank — Intelligent Credit Default Prediction System
+ Data → Preprocessing → DNN → Evaluation → ONNX → FastAPI → SHAP → Database → Dashboard → Docker
 
 **HelperAI Bank** is an end-to-end Artificial Intelligence application designed to predict the likelihood of credit card default using a **Deep Neural Network (DNN)**. The system transforms customer financial and repayment information into a predictive risk assessment, provides an interpretable explanation of each prediction, stores prediction records in a database, and presents historical results through an interactive dashboard.
 
