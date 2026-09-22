@@ -1,0 +1,20 @@
+services:
+
+  helperai-bank:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: helperai-bank
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - helperai_data:/app/data
+
+    restart: unless-stopped
+
+
+volumes:
+  helperai_data:

@@ -1,0 +1,26 @@
+[project]
+name = "helperai-bank"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Jehad Saad", email = "jehadsaad670@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.141.1",
+    "joblib",
+    "onnxruntime>=1.30.0",
+    "pydantic>=2.13.5",
+    "scikit-learn>=1.9.1",
+    "shap>=0.52.0",
+    "sqlalchemy>=2.0.54",
+    "tensorflow>=2.21.0",
+    "tf2onnx>=1.17.0",
+    "uvicorn>=0.53.0",
+]
+
+[project.scripts]
+helperai-bank = "helperai_bank:main"
+[tool.uv]
+package=false

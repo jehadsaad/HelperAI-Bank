@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>HelperAI Bank</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+            min-height: 100vh;
+        }
+
+        /* =========================
+           Header
+        ========================== */
+
+        header {
+            background: linear-gradient(135deg, #172554, #1d4ed8);
+            color: white;
+            padding: 45px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 38px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 17px;
+            opacity: 0.9;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1100px;
+            margin: 35px auto;
+        }
+
+        /* =========================
+           Form Card
+        ========================== */
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
+            border: 1px solid #e5e7eb;
+        }
+
+        .card h2 {
+            color: #172554;
+            margin-bottom: 25px;
+            font-size: 23px;
+            border-bottom: 2px solid #dbeafe;
+            padding-bottom: 12px;
+        }
+
+        /* =========================
+           Grid
+        ========================== */
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            font-size: 15px;
+            background: #ffffff;
+            color: #1f2937;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        /* Remove number input arrows */
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* =========================
+           Button
+        ========================== */
+
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 15px 45px;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* =========================
+           Result
+        ========================== */
+
+        #result {
+            display: none;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 18px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
+            border: 1px solid #e5e7eb;
+        }
+
+        .result-card h2 {
+            color: #172554;
+            margin-bottom: 25px;
+        }
+
+        .result-status {
+            text-align: center;
+            padding: 25px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+        }
+
+        .result-status.low-risk {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #047857;
+        }
+
+        .result-status.high-risk {
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            color: #be123c;
+        }
+
+        .result-status h3 {
+            font-size: 26px;
+            margin-bottom: 10px;
+        }
+
+        .probability {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* =========================
+           SHAP Reasons
+        ========================== */
+
+        .reasons-title {
+            margin-bottom: 15px;
+            color: #172554;
+        }
+
+        .reason {
+            background: #f8fafc;
+            border-left: 4px solid #2563eb;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border-radius: 7px;
+        }
+
+        .reason strong {
+            color: #172554;
+        }
+
+        .reason small {
+            display: block;
+            margin-top: 5px;
+            color: #64748b;
+        }
+
+        /* =========================
+           Loading
+        ========================== */
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #2563eb;
+            font-weight: bold;
+            display: none;
+        }
+
+        /* =========================
+           Footer
+        ========================== */
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        /* =========================
+           Responsive
+        ========================== */
+
+        @media (max-width: 700px) {
+
+            header h1 {
+                font-size: 30px;
+            }
+
+            .container {
+                width: 95%;
+            }
+
+            .card,
+            .result-card {
+                padding: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         Header
+    ========================== -->
+
+    <header>
+        <h1>HelperAI Bank</h1>
+        <p>AI-Powered Credit Risk Analysis</p>
+    </header>
+
+    <div class="container">
+
+        <!-- =========================
+             Customer Information
+        ========================== -->
+
+        <div class="card">
+
+            <h2>Customer Information</h2>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="LIMIT_BAL">Credit Limit</label>
+                    <input
+                        type="number"
+                        id="LIMIT_BAL"
+                        min="0"
+                        step="0.01"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="SEX">Sex</label>
+                    <select id="SEX" required>
+                        <option value="">Select</option>
+                        <option value="1">Male</option>
+                        <option value="2">Female</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="EDUCATION">Education Level</label>
+                    <select id="EDUCATION" required>
+                        <option value="">Select</option>
+                        <option value="1">Graduate School</option>
+                        <option value="2">University</option>
+                        <option value="3">High School</option>
+                        <option value="4">Others</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="MARRIAGE">Marital Status</label>
+                    <select id="MARRIAGE" required>
+                        <option value="">Select</option>
+                        <option value="1">Married</option>
+                        <option value="2">Single</option>
+                        <option value="3">Others</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="AGE">Age</label>
+                    <input
+                        type="number"
+                        id="AGE"
+                        min="18"
+                        max="100"
+                        required
+                    >
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- =========================
+             Repayment Information
+        ========================== -->
+
+        <div class="card">
+
+            <h2>Repayment Information</h2>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="PAY_0">Payment Status 1</label>
+                    <select id="PAY_0" required>
+                        <option value="">Select</option>
+                        <option value="-2">No Consumption</option>
+                        <option value="-1">Paid Duly</option>
+                        <option value="0">Normal Status</option>
+                        <option value="1">1 Month Delay</option>
+                        <option value="2">2 Months Delay</option>
+                        <option value="3">3 Months Delay</option>
+                        <option value="4">4 Months Delay</option>
+                        <option value="5">5 Months Delay</option>
+                        <option value="6">6 Months Delay</option>
+                        <option value="7">7 Months Delay</option>
+                        <option value="8">8 Months Delay</option>
+                        <option value="9">9+ Months Delay</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="PAY_2">Payment Status 2</label>
+                    <select id="PAY_2" required>
+                        <option value="">Select</option>
+                        <option value="-2">No Consumption</option>
+                        <option value="-1">Paid Duly</option>
+                        <option value="0">Normal Status</option>
+                        <option value="1">1 Month Delay</option>
+                        <option value="2">2 Months Delay</option>
+                        <option value="3">3 Months Delay</option>
+                        <option value="4">4 Months Delay</option>
+                        <option value="5">5 Months Delay</option>
+                        <option value="6">6 Months Delay</option>
+                        <option value="7">7 Months Delay</option>
+                        <option value="8">8 Months Delay</option>
+                        <option value="9">9+ Months Delay</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="PAY_3">Payment Status 3</label>
+                    <select id="PAY_3" required>
+                        <option value="">Select</option>
+                        <option value="-2">No Consumption</option>
+                        <option value="-1">Paid Duly</option>
+                        <option value="0">Normal Status</option>
+                        <option value="1">1 Month Delay</option>
+                        <option value="2">2 Months Delay</option>
+                        <option value="3">3 Months Delay</option>
+                        <option value="4">4 Months Delay</option>
+                        <option value="5">5 Months Delay</option>
+                        <option value="6">6 Months Delay</option>
+                        <option value="7">7 Months Delay</option>
+                        <option value="8">8 Months Delay</option>
+                        <option value="9">9+ Months Delay</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="PAY_4">Payment Status 4</label>
+                    <select id="PAY_4" required>
+                        <option value="">Select</option>
+                        <option value="-2">No Consumption</option>
+                        <option value="-1">Paid Duly</option>
+                        <option value="0">Normal Status</option>
+                        <option value="1">1 Month Delay</option>
+                        <option value="2">2 Months Delay</option>
+                        <option value="3">3 Months Delay</option>
+                        <option value="4">4 Months Delay</option>
+                        <option value="5">5 Months Delay</option>
+                        <option value="6">6 Months Delay</option>
+                        <option value="7">7 Months Delay</option>
+                        <option value="8">8 Months Delay</option>
+                        <option value="9">9+ Months Delay</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="PAY_5">Payment Status 5</label>
+                    <select id="PAY_5" required>
+                        <option value="">Select</option>
+                        <option value="-2">No Consumption</option>
+                        <option value="-1">Paid Duly</option>
+                        <option value="0">Normal Status</option>
+                        <option value="1">1 Month Delay</option>
+                        <option value="2">2 Months Delay</option>
+                        <option value="3">3 Months Delay</option>
+                        <option value="4">4 Months Delay</option>
+                        <option value="5">5 Months Delay</option>
+                        <option value="6">6 Months Delay</option>
+                        <option value="7">7 Months Delay</option>
+                        <option value="8">8 Months Delay</option>
+                        <option value="9">9+ Months Delay</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="PAY_6">Payment Status 6</label>
+                    <select id="PAY_6" required>
+                        <option value="">Select</option>
+                        <option value="-2">No Consumption</option>
+                        <option value="-1">Paid Duly</option>
+                        <option value="0">Normal Status</option>
+                        <option value="1">1 Month Delay</option>
+                        <option value="2">2 Months Delay</option>
+                        <option value="3">3 Months Delay</option>
+                        <option value="4">4 Months Delay</option>
+                        <option value="5">5 Months Delay</option>
+                        <option value="6">6 Months Delay</option>
+                        <option value="7">7 Months Delay</option>
+                        <option value="8">8 Months Delay</option>
+                        <option value="9">9+ Months Delay</option>
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- =========================
+             Bill Amounts
+        ========================== -->
+
+        <div class="card">
+
+            <h2>Bill Amounts</h2>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="BILL_AMT1">Bill Amount 1</label>
+                    <input type="number" id="BILL_AMT1" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="BILL_AMT2">Bill Amount 2</label>
+                    <input type="number" id="BILL_AMT2" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="BILL_AMT3">Bill Amount 3</label>
+                    <input type="number" id="BILL_AMT3" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="BILL_AMT4">Bill Amount 4</label>
+                    <input type="number" id="BILL_AMT4" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="BILL_AMT5">Bill Amount 5</label>
+                    <input type="number" id="BILL_AMT5" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="BILL_AMT6">Bill Amount 6</label>
+                    <input type="number" id="BILL_AMT6" step="0.01" required>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- =========================
+             Payment Amounts
+        ========================== -->
+
+        <div class="card">
+
+            <h2>Payment Amounts</h2>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="PAY_AMT1">Payment Amount 1</label>
+                    <input type="number" id="PAY_AMT1" min="0" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="PAY_AMT2">Payment Amount 2</label>
+                    <input type="number" id="PAY_AMT2" min="0" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="PAY_AMT3">Payment Amount 3</label>
+                    <input type="number" id="PAY_AMT3" min="0" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="PAY_AMT4">Payment Amount 4</label>
+                    <input type="number" id="PAY_AMT4" min="0" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="PAY_AMT5">Payment Amount 5</label>
+                    <input type="number" id="PAY_AMT5" min="0" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="PAY_AMT6">Payment Amount 6</label>
+                    <input type="number" id="PAY_AMT6" min="0" step="0.01" required>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- =========================
+             Predict Button
+        ========================== -->
+
+        <div class="button-container">
+            <button id="predictButton" onclick="predictRisk()">
+                Analyze Credit Risk
+            </button>
+        </div>
+
+        <div class="loading" id="loading">
+            Analyzing customer data...
+        </div>
+
+
+        <!-- =========================
+             Result
+        ========================== -->
+
+        <div id="result">
+
+            <div class="result-card">
+
+                <h2>Prediction Result</h2>
+
+                <div id="resultStatus" class="result-status">
+
+                    <h3 id="predictionText"></h3>
+
+                    <div class="probability">
+                        Default Probability:
+                        <span id="probability"></span>
+                    </div>
+
+                </div>
+
+
+                <h3 class="reasons-title">
+                    Main Factors
+                </h3>
+
+                <div id="reasons"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <footer>
+        HelperAI Bank — AI-Powered Credit Risk Analysis
+    </footer>
+
+
+    <script>
+
+        /* =========================
+           Feature display names
+        ========================== */
+
+        const featureNames = {
+
+            LIMIT_BAL: "Credit Limit",
+            SEX: "Sex",
+            EDUCATION: "Education Level",
+            MARRIAGE: "Marital Status",
+            AGE: "Age",
+
+            PAY_0: "Payment Status 1",
+            PAY_2: "Payment Status 2",
+            PAY_3: "Payment Status 3",
+            PAY_4: "Payment Status 4",
+            PAY_5: "Payment Status 5",
+            PAY_6: "Payment Status 6",
+
+            BILL_AMT1: "Bill Amount 1",
+            BILL_AMT2: "Bill Amount 2",
+            BILL_AMT3: "Bill Amount 3",
+            BILL_AMT4: "Bill Amount 4",
+            BILL_AMT5: "Bill Amount 5",
+            BILL_AMT6: "Bill Amount 6",
+
+            PAY_AMT1: "Payment Amount 1",
+            PAY_AMT2: "Payment Amount 2",
+            PAY_AMT3: "Payment Amount 3",
+            PAY_AMT4: "Payment Amount 4",
+            PAY_AMT5: "Payment Amount 5",
+            PAY_AMT6: "Payment Amount 6"
+        };
+
+
+        /* =========================
+           Get input value
+        ========================== */
+
+        function getValue(id) {
+
+            const element = document.getElementById(id);
+
+            if (!element.value) {
+                throw new Error(
+                    `Please fill in: ${featureNames[id] || id}`
+                );
+            }
+
+            return Number(element.value);
+        }
+
+
+        /* =========================
+           Prediction
+        ========================== */
+
+        async function predictRisk() {
+
+            const button = document.getElementById("predictButton");
+            const loading = document.getElementById("loading");
+            const result = document.getElementById("result");
+
+            try {
+
+                button.disabled = true;
+                loading.style.display = "block";
+                result.style.display = "none";
+
+
+                /* =========================
+                   Collect customer data
+                   Keep exact backend order
+                ========================== */
+
+                const customerData = {
+
+                    LIMIT_BAL: getValue("LIMIT_BAL"),
+                    SEX: getValue("SEX"),
+                    EDUCATION: getValue("EDUCATION"),
+                    MARRIAGE: getValue("MARRIAGE"),
+                    AGE: getValue("AGE"),
+
+                    PAY_0: getValue("PAY_0"),
+                    PAY_2: getValue("PAY_2"),
+                    PAY_3: getValue("PAY_3"),
+                    PAY_4: getValue("PAY_4"),
+                    PAY_5: getValue("PAY_5"),
+                    PAY_6: getValue("PAY_6"),
+
+                    BILL_AMT1: getValue("BILL_AMT1"),
+                    BILL_AMT2: getValue("BILL_AMT2"),
+                    BILL_AMT3: getValue("BILL_AMT3"),
+                    BILL_AMT4: getValue("BILL_AMT4"),
+                    BILL_AMT5: getValue("BILL_AMT5"),
+                    BILL_AMT6: getValue("BILL_AMT6"),
+
+                    PAY_AMT1: getValue("PAY_AMT1"),
+                    PAY_AMT2: getValue("PAY_AMT2"),
+                    PAY_AMT3: getValue("PAY_AMT3"),
+                    PAY_AMT4: getValue("PAY_AMT4"),
+                    PAY_AMT5: getValue("PAY_AMT5"),
+                    PAY_AMT6: getValue("PAY_AMT6")
+                };
+
+
+                /* =========================
+                   Send request to FastAPI
+                ========================== */
+
+                const response = await fetch("/predict", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify(customerData)
+                });
+
+
+                const data = await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.detail || "Prediction failed."
+                    );
+                }
+
+
+                /* =========================
+                   Display prediction
+                ========================== */
+
+                const resultStatus =
+                    document.getElementById("resultStatus");
+
+                const predictionText =
+                    document.getElementById("predictionText");
+
+                const probability =
+                    document.getElementById("probability");
+
+
+                predictionText.textContent =
+                    data.prediction_text;
+
+                probability.textContent =
+                    `${(data.default_probability * 100).toFixed(2)}%`;
+
+
+                /* =========================
+                   Risk style
+                ========================== */
+
+                resultStatus.classList.remove(
+                    "low-risk",
+                    "high-risk"
+                );
+
+
+                if (data.prediction === 1) {
+
+                    resultStatus.classList.add("high-risk");
+
+                } else {
+
+                    resultStatus.classList.add("low-risk");
+                }
+
+
+                /* =========================
+                   Display SHAP reasons
+                ========================== */
+
+                const reasonsContainer =
+                    document.getElementById("reasons");
+
+                reasonsContainer.innerHTML = "";
+
+
+                if (data.reasons && data.reasons.length > 0) {
+
+                    data.reasons.forEach(reason => {
+
+                        const div =
+                            document.createElement("div");
+
+                        div.className = "reason";
+
+
+                        const displayName =
+                            featureNames[reason.feature]
+                            || reason.feature;
+
+
+                        div.innerHTML = `
+
+                            <strong>
+                                ${displayName}
+                            </strong>
+
+                            <small>
+                                ${reason.effect}
+                            </small>
+
+                        `;
+
+
+                        reasonsContainer.appendChild(div);
+                    });
+
+                } else {
+
+                    reasonsContainer.innerHTML = `
+                        <div class="reason">
+                            No explanation available.
+                        </div>
+                    `;
+                }
+
+
+                result.style.display = "block";
+
+
+                /* Scroll to result */
+
+                result.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+
+            }
+
+            catch (error) {
+
+                alert(error.message);
+
+            }
+
+            finally {
+
+                button.disabled = false;
+                loading.style.display = "none";
+            }
+        }
+
+    </script>
+
+</body>
+</html>

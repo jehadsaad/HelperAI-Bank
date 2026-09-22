@@ -1,0 +1,10 @@
+.venv
+__pycache__
+*.pyc
+.ipynb_checkpoints
+.git
+.gitignore
+.vscode
+.idea
+correlation.png
+api/.dockerignore
