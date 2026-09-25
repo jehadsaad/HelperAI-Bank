@@ -368,6 +368,7 @@ HelperAI-Bank/
 ├── frontend/
 │   ├── index.html
 │   └── dashboard.html
+
 │
 ├── data/
 │   └── helperai_bank.db
